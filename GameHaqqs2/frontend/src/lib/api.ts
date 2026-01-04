@@ -720,3 +720,149 @@ export const api = {
     });
   },
 };
+
+// ========================================
+// RAWG API INTEGRATION
+// ========================================
+
+export interface RawgGame {
+  id: number;
+  name: string;
+  slug: string;
+  background_image: string;
+  rating: number;
+  released: string;
+  genres: Array<{ id: number; name: string; slug: string }>;
+  platforms: Array<{ platform: { id: number; name: string } }>;
+  developers?: Array<{ id: number; name: string }>;
+  description?: string;
+  description_raw?: string;
+  metacritic?: number;
+  playtime?: number;
+  screenshots_count?: number;
+}
+
+export interface RawgGamesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: RawgGame[];
+}
+
+export const rawgApi = {
+  /**
+   * GET /api/rawg/games
+   * Fetch games from RAWG API with optional filters
+   */
+  getGames: async (params?: {
+    search?: string;
+    genres?: string;
+    platforms?: string;
+    ordering?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<RawgGamesResponse> => {
+    const queryParams = new URLSearchParams();
+    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    
+    const endpoint = `/rawg/games${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    console.log(`🎮 RAWG API: GET ${endpoint}`);
+    return makeRequest(endpoint);
+  },
+
+  /**
+   * GET /api/rawg/games/{id}
+   * Get single game details from RAWG
+   */
+  getGameById: async (id: number): Promise<RawgGame> => {
+    console.log(`🎮 RAWG API: GET /rawg/games/${id}`);
+    return makeRequest(`/rawg/games/${id}`);
+  },
+
+  /**
+   * GET /api/rawg/games/{id}/screenshots
+   * Get game screenshots
+   */
+  getGameScreenshots: async (id: number) => {
+    console.log(`🎮 RAWG API: GET /rawg/games/${id}/screenshots`);
+    return makeRequest(`/rawg/games/${id}/screenshots`);
+  },
+
+  /**
+   * GET /api/rawg/search?q={query}
+   * Search games by title
+   */
+  searchGames: async (query: string, page: number = 1): Promise<RawgGamesResponse> => {
+    console.log(`🎮 RAWG API: Search "${query}"`);
+    return makeRequest(`/rawg/search?q=${encodeURIComponent(query)}&page=${page}`);
+  },
+
+  /**
+   * GET /api/rawg/popular
+   * Get popular/highly rated games
+   */
+  getPopularGames: async (limit: number = 20): Promise<RawgGamesResponse> => {
+    console.log(`🎮 RAWG API: GET /rawg/popular`);
+    return makeRequest(`/rawg/popular?limit=${limit}`);
+  },
+
+  /**
+   * GET /api/rawg/recent
+   * Get recently released games
+   */
+  getRecentGames: async (limit: number = 20): Promise<RawgGamesResponse> => {
+    console.log(`🎮 RAWG API: GET /rawg/recent`);
+    return makeRequest(`/rawg/recent?limit=${limit}`);
+  },
+
+  /**
+   * GET /api/rawg/upcoming
+   * Get upcoming game releases
+   */
+  getUpcomingGames: async (limit: number = 20): Promise<RawgGamesResponse> => {
+    console.log(`🎮 RAWG API: GET /rawg/upcoming`);
+    return makeRequest(`/rawg/upcoming?limit=${limit}`);
+  },
+
+  /**
+   * GET /api/rawg/genre/{genre}
+   * Get games by genre
+   */
+  getGamesByGenre: async (genre: string, page: number = 1): Promise<RawgGamesResponse> => {
+    console.log(`🎮 RAWG API: GET /rawg/genre/${genre}`);
+    return makeRequest(`/rawg/genre/${genre}?page=${page}`);
+  },
+
+  /**
+   * POST /api/rawg/import
+   * Import a game from RAWG to local database
+   * Requires: Authentication
+   */
+  importGame: async (rawgId: number) => {
+    console.log(`🎮 RAWG API: POST /rawg/import (ID: ${rawgId})`);
+    return makeRequest('/rawg/import', {
+      method: 'POST',
+      body: JSON.stringify({ rawg_id: rawgId }),
+    });
+  },
+
+  /**
+   * POST /api/rawg/sync-popular
+   * Sync popular games to local database
+   * Requires: Authentication
+   */
+  syncPopularGames: async (limit: number = 50) => {
+    console.log(`🎮 RAWG API: POST /rawg/sync-popular`);
+    return makeRequest('/rawg/sync-popular', {
+      method: 'POST',
+      body: JSON.stringify({ limit }),
+    });
+  },
+};

@@ -14,6 +14,7 @@ class Game extends Model
     protected $with = [];
 
     protected $fillable = [
+        'rawg_id',
         'title',
         'genre',
         'release_date',
@@ -22,6 +23,13 @@ class Game extends Model
         'platform',
         'image_url',
         'rating',
+        'external_data',
+    ];
+
+    protected $casts = [
+        'external_data' => 'array',
+        'release_date' => 'date',
+        'rating' => 'decimal:2',
     ];
 
     public function posts(): HasMany

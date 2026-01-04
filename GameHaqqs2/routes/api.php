@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\{
     AchievementController
 };
 use App\Http\Controllers\ModeratorController;
+use App\Http\Controllers\GameApiController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -170,5 +171,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/posts/{id}/approve', [ModeratorController::class, 'approve']);
             Route::post('/posts/{id}/decline', [ModeratorController::class, 'decline']);
         });
+    });
+});
+
+// ========================================
+// RAWG API INTEGRATION ROUTES (Public)
+// ========================================
+Route::prefix('rawg')->group(function () {
+    // Browse games from RAWG
+    Route::get('/games', [GameApiController::class, 'index']);
+    Route::get('/games/{id}', [GameApiController::class, 'show']);
+    Route::get('/games/{id}/screenshots', [GameApiController::class, 'screenshots']);
+    
+    // Search and filters
+    Route::get('/search', [GameApiController::class, 'search']);
+    Route::get('/popular', [GameApiController::class, 'popular']);
+    Route::get('/recent', [GameApiController::class, 'recent']);
+    Route::get('/upcoming', [GameApiController::class, 'upcoming']);
+    Route::get('/genre/{genre}', [GameApiController::class, 'byGenre']);
+    
+    // Import games to local database (protected)
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('/import', [GameApiController::class, 'import']);
+        Route::post('/sync-popular', [GameApiController::class, 'syncPopular']);
     });
 });
