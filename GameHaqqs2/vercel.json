@@ -1,8 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
-  "framework": "vite",
+  "buildCommand": "cd GameHaqqs2/frontend && npm run build",
+  "outputDirectory": "GameHaqqs2/frontend/build",
+  "installCommand": "cd GameHaqqs2/frontend && npm install",
   "rewrites": [
     {
       "source": "/(.*)",
