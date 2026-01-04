@@ -16,8 +16,8 @@ import { TipsPage } from './pages/TipsPage';
 import { WikiPage } from './pages/WikiPage';
 import './styles/globals.css';
 
-function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
-  const { user, isInitialized } = useAuth();
+function ProtectedRoute({ children, allowedRoles, allowGuests = false }: { children: React.ReactNode; allowedRoles?: string[]; allowGuests?: boolean }) {
+  const { user, isInitialized, isGuest } = useAuth();
 
   // Wait for auth to initialize before redirecting
   if (!isInitialized) {
@@ -31,7 +31,12 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
     );
   }
 
-  if (!user) {
+  // Allow guest access to specified routes
+  if (allowGuests && isGuest) {
+    return <>{children}</>;
+  }
+
+  if (!user && !isGuest) {
     return <Navigate to="/login" replace />;
   }
 
@@ -46,7 +51,7 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
 }
 
 function AppRoutes() {
-  const { user, isInitialized } = useAuth();
+  const { user, isInitialized, isGuest } = useAuth();
 
   // Wait for auth to initialize
   if (!isInitialized) {
@@ -61,25 +66,25 @@ function AppRoutes() {
   }
 
   const getDefaultRoute = () => {
-    if (!user) return '/';
-    if (user.role === 'admin') return '/admin';
-    if (user.role === 'moderator') return '/moderator';
+    if (!user && !isGuest) return '/';
+    if (user?.role === 'admin') return '/admin';
+    if (user?.role === 'moderator') return '/moderator';
     return '/games';
   };
 
   return (
     <>
-      {user && <Navbar />}
+      {(user || isGuest) && <Navbar />}
       <Routes>
-        <Route path="/" element={user ? <Navigate to={getDefaultRoute()} replace /> : <LandingPage />} />
-        <Route path="/index.html" element={user ? <Navigate to={getDefaultRoute()} replace /> : <LandingPage />} />
-        <Route path="/preview_page.html" element={user ? <Navigate to={getDefaultRoute()} replace /> : <LandingPage />} />
-        <Route path="/login" element={user ? <Navigate to={getDefaultRoute()} replace /> : <LoginPage />} />
-        <Route path="/register" element={user ? <Navigate to={getDefaultRoute()} replace /> : <RegisterPage />} />
+        <Route path="/" element={(user || isGuest) ? <Navigate to={getDefaultRoute()} replace /> : <LandingPage />} />
+        <Route path="/index.html" element={(user || isGuest) ? <Navigate to={getDefaultRoute()} replace /> : <LandingPage />} />
+        <Route path="/preview_page.html" element={(user || isGuest) ? <Navigate to={getDefaultRoute()} replace /> : <LandingPage />} />
+        <Route path="/login" element={(user || isGuest) ? <Navigate to={getDefaultRoute()} replace /> : <LoginPage />} />
+        <Route path="/register" element={(user || isGuest) ? <Navigate to={getDefaultRoute()} replace /> : <RegisterPage />} />
         <Route
           path="/games"
           element={
-            <ProtectedRoute allowedRoles={['user']}>
+            <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
               <GamesLibrary />
             </ProtectedRoute>
           }
@@ -87,7 +92,7 @@ function AppRoutes() {
         <Route
           path="/games/:id"
           element={
-            <ProtectedRoute allowedRoles={['user']}>
+            <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
               <GameDetail />
             </ProtectedRoute>
           }
@@ -133,7 +138,7 @@ function AppRoutes() {
         <Route
           path="/tips"
           element={
-            <ProtectedRoute allowedRoles={['user']}>
+            <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
               <TipsPage />
             </ProtectedRoute>
           }
@@ -141,7 +146,7 @@ function AppRoutes() {
         <Route
           path="/wiki"
           element={
-            <ProtectedRoute allowedRoles={['user']}>
+            <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
               <WikiPage />
             </ProtectedRoute>
           }

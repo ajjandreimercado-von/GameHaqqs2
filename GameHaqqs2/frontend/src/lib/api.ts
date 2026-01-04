@@ -1,6 +1,6 @@
 /**
  * REAL API CALLS TO LARAVEL BACKEND
- * Base URL: http://127.0.0.1:8000/api
+ * Base URL: http://127.0.0.1:8000/api (development)
  * 
  * All API calls are documented with:
  * - Endpoint: HTTP method and path
@@ -10,9 +10,8 @@
  * - How to test in Postman
  */
 
-// Use the same backend base URL as the auth provider (artisan server)
-// (Keep this in sync with `src/lib/auth.tsx` or, better, move to a Vite env variable)
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Use environment variable for API URL, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 /**
  * Helper to get auth token from localStorage

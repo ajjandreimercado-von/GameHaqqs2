@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
 import { Button } from '../components/ui/button';
-import { Gamepad2, Users, Trophy, Zap, Star, TrendingUp, Award, Shield, Sparkles, MessageSquare, Boxes, BookOpen } from 'lucide-react';
+import { Gamepad2, Users, Trophy, Zap, Star, TrendingUp, Award, Shield, Sparkles, MessageSquare, Boxes, BookOpen, Eye } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { enterGuestMode } = useAuth();
 
   const featuredGames = [
     { 
@@ -106,6 +108,18 @@ export function LandingPage() {
                 className="border-[#2a475e] bg-[#16202d]/80 hover:bg-[#2a475e] text-[#c7d5e0] backdrop-blur-sm"
               >
                 Sign In
+              </Button>
+              <Button 
+                size="lg" 
+                variant="ghost" 
+                onClick={() => {
+                  enterGuestMode();
+                  navigate('/games');
+                }}
+                className="text-[#8f98a0] hover:text-[#66c0f4] hover:bg-[#2a475e]/50 border border-[#2a475e]/50 backdrop-blur-sm"
+              >
+                <Eye className="h-5 w-5 mr-2" />
+                View as Guest
               </Button>
             </div>
 

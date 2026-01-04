@@ -22,3 +22,19 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Exclude parent directory files
+../*.zip
+../*.php
+../*.png
+../*/
+
+# Frontend dependencies and build
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Public uploads
+/public/videos/posts/*.mp4
+/public/images/uploads/

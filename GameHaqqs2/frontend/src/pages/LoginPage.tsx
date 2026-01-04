@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useAuth } from '../lib/auth';
-import { Gamepad2, Loader2, AlertCircle, Shield, User, Crown } from 'lucide-react';
+import { Gamepad2, Loader2, AlertCircle, Shield, User, Crown, Eye } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { login, loading, enterGuestMode } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'user' | 'admin' | 'moderator'>('user');
@@ -157,6 +157,30 @@ export function LoginPage() {
               ) : (
                 'Sign In'
               )}
+            </Button>
+
+            <div className="text-center">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-[#2a475e]" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-gradient-to-b from-[#1e3447] to-[#16202d] px-2 text-[#8f98a0]">Or</span>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-[#2a475e] text-[#c7d5e0] hover:bg-[#2a475e]/50 hover:border-[#66c0f4]/50"
+              onClick={() => {
+                enterGuestMode();
+                navigate('/games');
+              }}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Continue as Guest
             </Button>
 
             <div className="text-center text-sm pt-2">

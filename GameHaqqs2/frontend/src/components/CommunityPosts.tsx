@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { SignInPrompt } from './SignInPrompt';
+import { GuestModeBanner } from './GuestModeBanner';
 import { Heart, MessageCircle, Image as ImageIcon, Video, FileText, Send, Clock, CheckCircle, Flag, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
@@ -38,10 +40,11 @@ interface Post {
 }
 
 export function CommunityPosts() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [signInPrompt, setSignInPrompt] = useState({ open: false, action: '' });
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -138,6 +141,10 @@ export function CommunityPosts() {
   };
 
   const handleLike = async (postId: number) => {
+    if (isGuest) {
+      setSignInPrompt({ open: true, action: 'like posts' });
+      return;
+    }
     try {
       const response = await api.togglePostLike(postId);
       setPosts(posts.map(post => {
@@ -215,6 +222,10 @@ export function CommunityPosts() {
   };
 
   const handleComment = async (postId: number) => {
+    if (isGuest) {
+      setSignInPrompt({ open: true, action: 'comment on posts' });
+      return;
+    }
     const commentText = commentInputs[postId]?.trim();
     if (!commentText) return;
 
@@ -247,6 +258,10 @@ export function CommunityPosts() {
   };
 
   const handleReportPost = (post: Post) => {
+    if (isGuest) {
+      setSignInPrompt({ open: true, action: 'report posts' });
+      return;
+    }
     setReportingPost(post);
     setIsReportDialogOpen(true);
   };
@@ -277,14 +292,25 @@ export function CommunityPosts() {
 
   return (
     <div className="space-y-6">
+      <GuestModeBanner />
+      
       {/* Create Post Button */}
       <Card className="border-[#2a475e] bg-gradient-to-b from-[#16202d] to-[#171a21]">
         <CardContent className="p-4">
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white">
+              <Button 
+                className="w-full bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white"
+                disabled={isGuest}
+                onClick={(e) => {
+                  if (isGuest) {
+                    e.preventDefault();
+                    setSignInPrompt({ open: true, action: 'create posts' });
+                  }
+                }}
+              >
                 <FileText className="h-4 w-4 mr-2" />
-                Create New Post
+                Create New Post {isGuest && '(Sign in required)'}
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-[#16202d] border-[#2a475e] text-[#c7d5e0]">
@@ -627,6 +653,13 @@ export function CommunityPosts() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Sign In Prompt */}
+      <SignInPrompt
+        open={signInPrompt.open}
+        onOpenChange={(open) => setSignInPrompt({ ...signInPrompt, open })}
+        action={signInPrompt.action}
+      />
     </div>
   );
 }

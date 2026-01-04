@@ -7,6 +7,9 @@ import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Separator } from '../components/ui/separator';
 import { Progress } from '../components/ui/progress';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { SignInPrompt } from '../components/SignInPrompt';
+import { GuestModeBanner } from '../components/GuestModeBanner';
+import { useAuth } from '../lib/auth';
 import { ArrowLeft, Users, Star, ThumbsUp, ThumbsDown, Lightbulb, BookOpen, TrendingUp, MessageSquare, Loader2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
@@ -75,6 +78,7 @@ interface Tip {
 export function GameDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
   const [game, setGame] = useState<GameDetailType | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [tips, setTips] = useState<Tip[]>([]);
@@ -84,6 +88,7 @@ export function GameDetail() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [tipDialogOpen, setTipDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [signInPrompt, setSignInPrompt] = useState({ open: false, action: '' });
 
   // Review form state
   const [reviewForm, setReviewForm] = useState({
@@ -166,6 +171,10 @@ export function GameDetail() {
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isGuest) {
+      setSignInPrompt({ open: true, action: 'submit reviews' });
+      return;
+    }
     if (!game) return;
 
     try {
@@ -186,6 +195,10 @@ export function GameDetail() {
 
   const handleSubmitTip = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isGuest) {
+      setSignInPrompt({ open: true, action: 'submit tips and tricks' });
+      return;
+    }
     if (!game) return;
 
     try {
@@ -243,6 +256,9 @@ export function GameDetail() {
           <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
           Back to Library
         </Button>
+
+        {/* Guest Mode Banner */}
+        <GuestModeBanner />
 
         {/* Game Header */}
         <div className="grid lg:grid-cols-3 gap-6 mb-12">
@@ -474,8 +490,18 @@ export function GameDetail() {
                   <CardTitle className="text-[#c7d5e0]">Player Reviews ({reviews.length})</CardTitle>
                   <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105">
-                        Write a Review
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105"
+                        disabled={isGuest}
+                        onClick={(e) => {
+                          if (isGuest) {
+                            e.preventDefault();
+                            setSignInPrompt({ open: true, action: 'write reviews' });
+                          }
+                        }}
+                      >
+                        Write a Review {isGuest && '(Sign in required)'}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-[#1b2838] border-[#2a475e] text-[#c7d5e0]">
@@ -626,8 +652,18 @@ export function GameDetail() {
                   <CardTitle className="text-[#c7d5e0]">Tips & Tricks ({tips.length})</CardTitle>
                   <Dialog open={tipDialogOpen} onOpenChange={setTipDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105">
-                        Share a Tip
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105"
+                        disabled={isGuest}
+                        onClick={(e) => {
+                          if (isGuest) {
+                            e.preventDefault();
+                            setSignInPrompt({ open: true, action: 'share tips' });
+                          }
+                        }}
+                      >
+                        Share a Tip {isGuest && '(Sign in required)'}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-[#1b2838] border-[#2a475e] text-[#c7d5e0]">
@@ -761,6 +797,13 @@ export function GameDetail() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Sign In Prompt */}
+        <SignInPrompt
+          open={signInPrompt.open}
+          onOpenChange={(open) => setSignInPrompt({ ...signInPrompt, open })}
+          action={signInPrompt.action}
+        />
       </div>
     </div>
   );

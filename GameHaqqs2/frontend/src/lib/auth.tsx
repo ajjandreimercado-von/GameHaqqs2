@@ -25,6 +25,9 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   isInitialized: boolean;
+  isGuest: boolean;
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,17 +41,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
 
   // Restore token and user from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem('auth_token');
     const savedUser = localStorage.getItem('auth_user');
+    const savedGuestMode = localStorage.getItem('guest_mode');
     
     console.log('🔍 Checking for saved auth...');
     console.log('Saved token:', savedToken ? 'Found' : 'Not found');
     console.log('Saved user:', savedUser ? 'Found' : 'Not found');
+    console.log('Guest mode:', savedGuestMode === 'true' ? 'Active' : 'Inactive');
     
-    if (savedToken && savedUser) {
+    if (savedGuestMode === 'true') {
+      setIsGuest(true);
+      console.log('👤 Guest mode activated');
+    } else if (savedToken && savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
         setToken(savedToken);
@@ -260,8 +269,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear token and user from localStorage
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('guest_mode');
       setToken(null);
       setUser(null);
+      setIsGuest(false);
       setLoading(false);
       
       // Redirect to home page after logout
@@ -269,8 +280,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * ENTER GUEST MODE
+   * Allows users to browse the app without authentication
+   * Guest users can view content but cannot perform any write operations
+   */
+  const enterGuestMode = () => {
+    console.log('👤 Entering guest mode...');
+    localStorage.setItem('guest_mode', 'true');
+    setIsGuest(true);
+  };
+
+  /**
+   * EXIT GUEST MODE
+   * Exits guest mode and returns to login screen
+   */
+  const exitGuestMode = () => {
+    console.log('👤 Exiting guest mode...');
+    localStorage.removeItem('guest_mode');
+    setIsGuest(false);
+    window.location.href = '/';
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading, error, isInitialized }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      login, 
+      register, 
+      logout, 
+      loading, 
+      error, 
+      isInitialized,
+      isGuest,
+      enterGuestMode,
+      exitGuestMode
+    }}>
       {children}
     </AuthContext.Provider>
   );

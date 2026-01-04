@@ -2,11 +2,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useAuth } from '../lib/auth';
-import { LogOut, Gamepad2, User, Shield, Crown } from 'lucide-react';
+import { LogOut, Gamepad2, User, Shield, Crown, Eye, LogIn, UserPlus } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
 
 export function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isGuest, exitGuestMode } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ export function Navbar() {
           </Link>
 
           {/* Navigation Links */}
-          {user && user.role === 'user' && (
+          {(user?.role === 'user' || isGuest) && (
             <div className="hidden md:flex items-center gap-1">
               <Link 
                 to="/games" 
@@ -44,6 +44,33 @@ export function Navbar() {
               >
                 Library
               </Link>
+            </div>
+          )}
+
+          {/* Guest Mode - Sign In/Up Buttons */}
+          {isGuest && (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#2a475e]/30 border border-[#66c0f4]/30">
+                <Eye className="h-4 w-4 text-[#66c0f4]" />
+                <span className="text-sm text-[#66c0f4]">Guest Mode</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate('/login')}
+                className="border-[#66c0f4] text-[#66c0f4] hover:bg-[#66c0f4]/10"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate('/register')}
+                className="bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Join Now
+              </Button>
             </div>
           )}
 

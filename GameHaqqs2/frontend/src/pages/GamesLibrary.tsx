@@ -7,6 +7,9 @@ import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { CommunityPosts } from '../components/CommunityPosts';
+import { GuestModeBanner } from '../components/GuestModeBanner';
+import { SignInPrompt } from '../components/SignInPrompt';
+import { useAuth } from '../lib/auth';
 import { Search, Users, Star, Flame, TrendingUp, Filter, MessageSquare, Loader2, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { api } from '../lib/api';
 
@@ -46,6 +49,7 @@ const getGenreColor = (genre: string) => {
 
 export function GamesLibrary() {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,6 +58,7 @@ export function GamesLibrary() {
   const [currentPage, setCurrentPage] = useState(1);
   const [favoriteGameIds, setFavoriteGameIds] = useState<Set<number>>(new Set());
   const [favoritingGame, setFavoritingGame] = useState<number | null>(null);
+  const [signInPrompt, setSignInPrompt] = useState({ open: false, action: '' });
   const gamesPerPage = 8;
 
   // Fetch user favorites
@@ -126,6 +131,11 @@ export function GamesLibrary() {
   const handleToggleFavorite = async (gameId: number, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation to game detail
     
+    if (isGuest) {
+      setSignInPrompt({ open: true, action: 'favorite games' });
+      return;
+    }
+    
     try {
       setFavoritingGame(gameId);
       const action = favoriteGameIds.has(gameId) ? 'remove' : 'add';
@@ -152,6 +162,9 @@ export function GamesLibrary() {
   return (
     <div className="min-h-screen bg-[#1b2838]">
       <div className="container mx-auto px-4 py-6">
+        {/* Guest Mode Banner */}
+        <GuestModeBanner />
+        
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-4xl mb-2 text-[#c7d5e0]" style={{ fontWeight: 700 }}>Game Library</h1>
@@ -425,6 +438,13 @@ export function GamesLibrary() {
             <CommunityPosts />
           </TabsContent>
         </Tabs>
+
+        {/* Sign In Prompt */}
+        <SignInPrompt
+          open={signInPrompt.open}
+          onOpenChange={(open) => setSignInPrompt({ ...signInPrompt, open })}
+          action={signInPrompt.action}
+        />
       </div>
     </div>
   );
