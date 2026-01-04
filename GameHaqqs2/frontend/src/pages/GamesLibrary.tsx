@@ -82,20 +82,50 @@ export function GamesLibrary() {
     const fetchGames = async () => {
       try {
         setLoading(true);
-        const response = await api.getAdminGames(1, 100);
         
-        if (response && response.data) {
-          // Transform API response to Game interface
-          const transformedGames = response.data.map((game: any) => ({
-            ...game,
-            category: game.genre,
-            image: game.image_url?.startsWith('http') ? game.image_url : `http://127.0.0.1:8000${game.image_url}`,
-            players: `${Math.floor(Math.random() * 20) + 5}K`,
-            trending: Math.random() > 0.4,
-            tags: [game.genre, game.platform?.split(',')[0]?.trim() || 'Gaming'].filter(Boolean)
-          }));
+        // Use RAWG API for guest users, regular API for authenticated users
+        let response;
+        if (isGuest) {
+          // Use RAWG API for popular games in guest mode
+          const { rawgApi } = await import('../lib/api');
+          response = await rawgApi.getPopularGames(100);
           
-          setGames(transformedGames);
+          if (response && response.results) {
+            // Transform RAWG API response to Game interface
+            const transformedGames = response.results.map((game: any) => ({
+              id: game.id,
+              title: game.name,
+              genre: game.genres?.[0]?.name || 'Gaming',
+              category: game.genres?.[0]?.name || 'Gaming',
+              image_url: game.background_image,
+              rating: game.rating || 0,
+              description: game.description || '',
+              platform: game.platforms?.map((p: any) => p.platform.name).join(', ') || 'PC',
+              release_date: game.released || '',
+              developer: game.developers?.[0]?.name || 'Unknown',
+              players: `${Math.floor(Math.random() * 20) + 5}K`,
+              trending: Math.random() > 0.4,
+              tags: [game.genres?.[0]?.name, game.platforms?.[0]?.platform.name].filter(Boolean)
+            }));
+            setGames(transformedGames);
+          }
+        } else {
+          // Authenticated users use the regular API
+          response = await api.getAdminGames(1, 100);
+          
+          if (response && response.data) {
+            // Transform API response to Game interface
+            const transformedGames = response.data.map((game: any) => ({
+              ...game,
+              category: game.genre,
+              image_url: game.image_url?.startsWith('http') ? game.image_url : `http://127.0.0.1:8000${game.image_url}`,
+              players: `${Math.floor(Math.random() * 20) + 5}K`,
+              trending: Math.random() > 0.4,
+              tags: [game.genre, game.platform?.split(',')[0]?.trim() || 'Gaming'].filter(Boolean)
+            }));
+            
+            setGames(transformedGames);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch games:', error);
@@ -106,7 +136,7 @@ export function GamesLibrary() {
     };
 
     fetchGames();
-  }, []);
+  }, [isGuest]);
 
   const filteredGames = games.filter(game => {
     const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

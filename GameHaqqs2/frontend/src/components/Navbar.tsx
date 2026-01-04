@@ -57,7 +57,10 @@ export function Navbar() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => navigate('/login')}
+                onClick={() => {
+                  exitGuestMode();
+                  navigate('/login');
+                }}
                 className="border-[#66c0f4] text-[#66c0f4] hover:bg-[#66c0f4]/10"
               >
                 <LogIn className="h-4 w-4 mr-2" />
@@ -65,7 +68,10 @@ export function Navbar() {
               </Button>
               <Button
                 size="sm"
-                onClick={() => navigate('/register')}
+                onClick={() => {
+                  exitGuestMode();
+                  navigate('/register');
+                }}
                 className="bg-gradient-to-r from-[#66c0f4] to-[#2a75bb] hover:from-[#5ab0e0] hover:to-[#236ba8] text-white"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
