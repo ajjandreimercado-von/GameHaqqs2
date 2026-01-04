@@ -1,6 +1,6 @@
 {
   "buildCommand": "cd GameHaqqs2/frontend && npm install && npm run build",
-  "outputDirectory": "GameHaqqs2/frontend/dist",
+  "outputDirectory": "GameHaqqs2/frontend/build",
   "installCommand": "cd GameHaqqs2/frontend && npm install",
   "rewrites": [
     {
