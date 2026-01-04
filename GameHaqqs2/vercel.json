@@ -1,11 +1,6 @@
 {
-  "buildCommand": "cd GameHaqqs2/frontend && npm run build",
-  "outputDirectory": "GameHaqqs2/frontend/build",
-  "installCommand": "cd GameHaqqs2/frontend && npm install",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "buildCommand": "cd GameHaqqs2/frontend-nextjs && npm install && npm run build",
+  "outputDirectory": "GameHaqqs2/frontend-nextjs/.next",
+  "installCommand": "cd GameHaqqs2/frontend-nextjs && npm install",
+  "framework": "nextjs"
 }
