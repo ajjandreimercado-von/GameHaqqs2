@@ -1,0 +1,21 @@
+# Ignore Laravel backend files
+/app
+/bootstrap
+/config
+/database
+/public
+/resources
+/routes
+/storage
+/tests
+/vendor
+artisan
+composer.json
+composer.lock
+phpunit.xml
+.env
+.env.example
+.htaccess
+
+# Keep only frontend
+!/frontend
