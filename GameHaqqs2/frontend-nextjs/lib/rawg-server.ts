@@ -4,7 +4,7 @@
 
 import 'server-only'; // Ensures this code never runs in the browser
 
-const RAWG_API_KEY = process.env.RAWG_API_KEY;
+const RAWG_API_KEY = process.env.RAWG_API_KEY || process.env.NEXT_RAWG_KEY;
 const RAWG_BASE_URL = 'https://api.rawg.io/api';
 
 if (!RAWG_API_KEY) {
